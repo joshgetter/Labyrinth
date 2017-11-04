@@ -30,8 +30,8 @@ class Labyrinth: SKScene{
         motionManager?.startAccelerometerUpdates();
     }
     func processDeviceMotion(forUpdate currentTime: CFTimeInterval){
-        //TODO Handle device flip causing control inversion
-        //TODO Add friction to either ground or ball
+        //TODO Handle device flip causing control inversion.
+        //TODO Add friction to either ground or ball.
         if(self.motionManager != nil){
             if let data = self.motionManager?.accelerometerData{
                 if (fabs(data.acceleration.x) > 0.2){
