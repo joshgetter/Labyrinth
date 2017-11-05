@@ -11,20 +11,50 @@ import GameplayKit
 import CoreMotion
 
 class Labyrinth: SKScene{
-    private var ball : SKSpriteNode?;
+    let BALLRADIUS = CGFloat(20);
+    private var ball : SKShapeNode?;
     private var stone : SKTileMapNode?;
     var motionManager : CMMotionManager?;
     override func didMove(to view: SKView) {
         //Setup edges
         self.physicsBody = SKPhysicsBody(edgeLoopFrom: self.frame);
         //Setup Ball
-        ball = self.childNode(withName: "ball") as? SKSpriteNode;
-        ball?.physicsBody = SKPhysicsBody.init(texture: SKTexture.init(imageNamed: "Spaceship"), size: (ball?.size)!);
-        ball?.physicsBody?.isDynamic = true;
-        ball?.physicsBody?.affectedByGravity = false;
-        ball?.physicsBody?.mass = 0.02;
+        let ballPos = self.childNode(withName: "ball")?.position;
+        ball = SKShapeNode(circleOfRadius: BALLRADIUS);
+        if(ball != nil){
+            ball!.fillColor = .black;
+            ball!.strokeColor = .darkGray;
+            ball!.physicsBody = SKPhysicsBody(circleOfRadius: BALLRADIUS);
+            ball!.physicsBody?.isDynamic = true;
+            ball!.physicsBody?.affectedByGravity = false;
+            ball!.physicsBody?.mass = 0.02;
+            ball!.position = ballPos!;
+            self.childNode(withName: "ball")?.removeFromParent();
+            self.addChild(ball!);
+        }
         //Stone Setup
         stone = self.childNode(withName: "stone") as? SKTileMapNode;
+        if(stone != nil){
+            let tileSize = stone!.tileSize;
+            let halfWidth = CGFloat(stone!.numberOfColumns)/2.0 * tileSize.width;
+            let halfHeight = CGFloat(stone!.numberOfRows)/2.0 * tileSize.height;
+            for row in 0..<stone!.numberOfRows{
+                for col in 0..<stone!.numberOfColumns{
+                    if let tile = stone!.tileDefinition(atColumn: col, row: row){
+                        let tileTexture = tile.textures[0];
+                        let physicsNode = SKNode();
+                        let x = CGFloat(col) * tileSize.width - halfWidth + (tileSize.width/2);
+                        let y = CGFloat(row) * tileSize.height - halfHeight + (tileSize.height/2);
+                        physicsNode.position = CGPoint(x: x, y: y);
+                        physicsNode.physicsBody = SKPhysicsBody(texture: tileTexture, size: stone!.tileSize);
+                        physicsNode.physicsBody?.affectedByGravity = false;
+                        physicsNode.physicsBody?.isDynamic = false;
+                        stone!.addChild(physicsNode);
+                    }
+                }
+            }
+        }
+
         //SETUP MOTION HANDLING
         motionManager = CMMotionManager();
         motionManager?.startAccelerometerUpdates();
@@ -43,7 +73,7 @@ class Labyrinth: SKScene{
             }
         }
     }
-
+    
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
     }
     
